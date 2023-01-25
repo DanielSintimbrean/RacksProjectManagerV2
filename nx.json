@@ -1,0 +1,37 @@
+{
+  "tasksRunnerOptions": {
+    "default": {
+      "runner": "nx/tasks-runners/default",
+      "options": {
+        "cacheableOperations": [
+          "test",
+          "compile",
+          "build",
+          "postinstall"
+        ]
+      }
+    }
+  },
+  "targetDefaults": {
+    "test": {
+      "dependsOn": ["^test"]
+    },
+    "compile": {
+      "dependsOn": ["^compile"],
+      "outputs": ["{projectRoot}/artifavts"]
+    },
+    "build": {
+      "dependsOn": ["^build", "compile"],
+      "outputs": ["{projectRoot}/dist", "{projectRoot}/.next"]
+    },
+    "dev": {
+      "dependsOn": ["^build"]
+    },
+    "postinstall": {
+      "dependsOn": ["^postinstall"]
+    },
+    "lint": {
+      "dependsOn": ["^lint"]
+    }
+  }
+}

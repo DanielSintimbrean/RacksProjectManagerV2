@@ -1,0 +1,22 @@
+{
+  "folders": [
+    {
+      "name": "root",
+      "path": "."
+    },
+    {
+      "name": "t3-for-web3",
+      "path": "./packages/t3-for-web3"
+    },
+    {
+      "name": "my-hardhat",
+      "path": "./packages/hardhat"
+    }
+  ],
+  "settings": {
+    "files.exclude": {
+      "**/node_modules/**": true,
+      "packages/*/*": true
+    }
+  }
+}
