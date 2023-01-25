@@ -7,7 +7,7 @@ import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./IHolderValidation.sol";
 import "../Project.sol";
 import "../Member.sol";
-import "../Err_RacksProjectManager.sol";
+import "../errors/Err_RacksProjectManager.sol";
 
 interface IRacksProjectManager {
     /////////////////

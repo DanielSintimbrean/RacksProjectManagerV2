@@ -5,7 +5,6 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "./interfaces/IHolderValidation.sol";
 import "./lib/StructuredLinkedList.sol";
-import "./Err.sol";
 
 contract HolderValidation is IHolderValidation, Ownable {
     /// State variables

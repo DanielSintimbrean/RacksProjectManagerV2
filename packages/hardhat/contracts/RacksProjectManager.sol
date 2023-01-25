@@ -7,7 +7,6 @@ pragma solidity ^0.8.7;
 import "@openzeppelin/contracts-upgradeable/proxy/utils/Initializable.sol";
 import "@openzeppelin/contracts-upgradeable/access/OwnableUpgradeable.sol";
 import "@openzeppelin/contracts-upgradeable/access/AccessControlUpgradeable.sol";
-import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "./interfaces/IRacksProjectManager.sol";
 import "./lib/StructuredLinkedList.sol";
 
@@ -96,6 +95,10 @@ contract RacksProjectManager is
 
     /**
      * @notice Create Project
+     * @param _name Project name
+     * @param _colateralCost Colateral that members must pay to join the project
+     * @param _reputationLevel Reputation level required to join the project
+     * @param _maxMembersNumber Maximum number of members that can join the project
      * @dev Only callable by Admins
      */
     function createProject(
@@ -131,6 +134,7 @@ contract RacksProjectManager is
     /**
      * @notice Add Member
      * @dev Only callable by Holders who are not already Members
+     * emit - NewMemberRegistered
      */
     function registerMember() external onlyHolder isNotPaused {
         if (isWalletMember(msg.sender))

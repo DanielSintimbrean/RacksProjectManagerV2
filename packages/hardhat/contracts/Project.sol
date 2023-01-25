@@ -5,7 +5,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import "@openzeppelin/contracts/access/AccessControl.sol";
 import "./interfaces/IRacksProjectManager.sol";
-import "./Err_Project.sol";
+import "./errors/Err_Project.sol";
 import "./lib/StructuredLinkedList.sol";
 
 contract Project is Ownable, AccessControl {
@@ -22,19 +22,23 @@ contract Project is Ownable, AccessControl {
     ProjectState private constant ACTIVE = ProjectState.Active;
     ProjectState private constant FINISHED = ProjectState.Finished;
     ProjectState private constant DELETED = ProjectState.Deleted;
+
     bytes32 private constant ADMIN_ROLE = 0x00;
 
     /// Interfaces
     IRacksProjectManager private immutable racksPM;
+    IERC20 private immutable racksPM_ERC20;
 
     /// ProjectMember
     using StructuredLinkedList for StructuredLinkedList.List;
-    StructuredLinkedList.List private contributorList;
+    StructuredLinkedList.List private memberList;
 
     uint256 private progressiveId = 0;
-    mapping(uint256 => Member) private projectMember;
-    mapping(address => uint256) private contributorId;
-    mapping(address => uint256) private participationOfMember;
+
+    mapping(address => uint256) private memberId;
+    mapping(uint256 => address) private memberAddress;
+
+    mapping(address => uint256) private membersParticipation;
     mapping(address => uint256) private projectFunds;
 
     /// State variables
@@ -43,15 +47,14 @@ contract Project is Ownable, AccessControl {
     uint256 private reputationLevel;
     uint256 private maxMemberNumber;
     uint256 private totalAmountFunded;
-    address[] public funders;
+    address[] public fundes;
     ProjectState private projectState;
-    IERC20 private immutable racksPM_ERC20;
 
     /**
-     * @notice Check that the project has no contributors, therefore is editable
+     * @notice Check that the project has no members, therefore is editable
      */
     modifier isEditable() {
-        if (contributorList.sizeOf() > 0) revert Project_IsNotEditableErr();
+        if (memberList.sizeOf() > 0) revert Project_IsNotEditableErr();
         _;
     }
 
@@ -72,9 +75,9 @@ contract Project is Ownable, AccessControl {
     }
 
     /**
-     * @notice Check that user is Contributor
+     * @notice Check that user is member
      */
-    modifier onlyContributor() {
+    modifier onlymember() {
         if (!racksPM.isWalletMember(msg.sender)) revert Project_NotMemberErr();
         _;
     }
@@ -106,7 +109,7 @@ contract Project is Ownable, AccessControl {
     // Events
     event newProjectMemberRegistered(
         address projectAddress,
-        address newProjectContributor
+        address newProjectmember
     );
     event projectFunded(
         address projectAddress,
@@ -126,8 +129,10 @@ contract Project is Ownable, AccessControl {
         colateralCost = _colateralCost;
         reputationLevel = _reputationLevel;
         maxMemberNumber = _maxMemberNumber;
+
         _setupRole(ADMIN_ROLE, msg.sender);
         _setupRole(ADMIN_ROLE, _racksPM.getRacksPMOwner());
+
         racksPM_ERC20 = _racksPM.getERC20Interface();
         projectState = PENDING;
     }
@@ -137,12 +142,12 @@ contract Project is Ownable, AccessControl {
     //////////////////////
 
     /**
-     * @notice Add Project Contributor
+     * @notice Add Project member
      * @dev Only callable by Holders who are already Member
      */
-    function registerProjectContributor()
+    function registerInProject()
         external
-        onlyContributor
+        onlymember
         isNotFinished
         isNotPaused
         isNotDeleted
@@ -150,28 +155,32 @@ contract Project is Ownable, AccessControl {
     {
         if (isMemberInProject(msg.sender))
             revert Project_MemberAlreadyExistsErr();
-        if (contributorList.sizeOf() == maxMemberNumber)
+
+        if (memberList.sizeOf() == maxMemberNumber)
             revert Project_MaxMembersNumberExceededErr();
 
-        Member memory contributor = racksPM.getMemberData(msg.sender);
+        Member memory member = getMemberData(msg.sender);
 
-        if (racksPM.isMemberBanned(contributor.wallet))
+        if (racksPM.isMemberBanned(member.wallet))
             revert Project_MemberIsBannedErr();
-        if (contributor.reputationLevel < reputationLevel)
+
+        if (member.reputationLevel < reputationLevel)
             revert Project_MemberHasNoReputationEnoughErr();
 
-        progressiveId++;
-        projectMember[progressiveId] = contributor;
-        contributorList.pushFront(progressiveId);
-        contributorId[contributor.wallet] = progressiveId;
+        ++progressiveId;
+        memberList.pushFront(progressiveId);
+        memberId[member.wallet] = progressiveId;
+        memberAddress[progressiveId] = member.wallet;
 
         emit newProjectMemberRegistered(address(this), msg.sender);
+
         if (colateralCost > 0) {
             bool success = racksPM_ERC20.transferFrom(
                 msg.sender,
                 address(this),
                 colateralCost
             );
+
             if (!success) revert Project_Erc20TransferFailed();
         }
     }
@@ -179,46 +188,47 @@ contract Project is Ownable, AccessControl {
     /**
      * @notice Finish Project
      * @dev Only callable by Admins when the project isn't completed
-     * - The contributors and participationWeights array must have the same size of the project contributors list.
-     * - If there is a banned Contributor in the project, you have to pass his address and participation (should be 0) anyways.
+     * - The members and participationWeights array must have the same size of the project members list.
+     * - If there is a banned member in the project, you have to pass his address and participation (should be 0) anyways.
      * - The sum of @param _participationWeights can not be more than 100
      */
     function finishProject(
         uint256 _totalReputationPointsReward,
-        address[] memory _contributors,
+        address[] memory _members,
         uint256[] memory _participationWeights
     ) external onlyAdmin isNotFinished isNotPaused isNotDeleted isNotPending {
         if (
             _totalReputationPointsReward <= 0 ||
-            _contributors.length != contributorList.sizeOf() ||
-            _participationWeights.length != contributorList.sizeOf()
+            _members.length != memberList.sizeOf() ||
+            _participationWeights.length != memberList.sizeOf()
         ) revert Project_InvalidParameterErr();
 
         projectState = FINISHED;
-        uint256 totalParticipationWeight = 0;
+        uint256 totalParticipationWeight;
+
         unchecked {
-            for (uint256 i = 0; i < _contributors.length; i++) {
-                if (!isMemberInProject(_contributors[i]))
+            for (uint256 i; i < _members.length; i++) {
+                if (!isMemberInProject(_members[i]))
                     revert Project_NotMemberErr();
 
                 uint256 participationWeight = _participationWeights[i];
 
-                participationOfMember[_contributors[i]] = participationWeight;
+                membersParticipation[_members[i]] = participationWeight;
                 totalParticipationWeight += participationWeight;
             }
             if (totalParticipationWeight > 100)
                 revert Project_InvalidParameterErr();
         }
         unchecked {
-            (bool existNext, uint256 i) = contributorList.getNextNode(0);
+            (bool existNext, uint256 i) = memberList.getNextNode(0);
 
             while (i != 0 && existNext) {
-                address contrAddress = projectMember[i].wallet;
+                address contrAddress = memberAddress[i];
 
                 uint256 reputationToIncrease = (_totalReputationPointsReward *
-                    participationOfMember[contrAddress]) / 100;
+                    membersParticipation[contrAddress]) / 100;
 
-                increaseContributorReputation(reputationToIncrease, i);
+                increaseMemberReputation(reputationToIncrease, i);
                 racksPM.setAccountToMemberData(contrAddress, projectMember[i]);
 
                 if (colateralCost > 0) {
@@ -229,7 +239,7 @@ contract Project is Ownable, AccessControl {
                     if (!success) revert Project_Erc20TransferFailed();
                 }
 
-                (existNext, i) = contributorList.getNextNode(i);
+                (existNext, i) = memberList.getNextNode(i);
             }
         }
         if (racksPM_ERC20.balanceOf(address(this)) > 0) shareProfits();
@@ -237,17 +247,17 @@ contract Project is Ownable, AccessControl {
 
     /**
      * @notice Fund the project with ERC20
-     * @dev This serves as a reward to contributors
+     * @dev This serves as a reward to members
      */
     function fundProject(
         uint256 _amount
     ) external isNotPaused isNotDeleted isNotPending {
-        if (_amount <= 0 || contributorList.sizeOf() < 1)
+        if (_amount <= 0 || memberList.sizeOf() < 1)
             revert Project_InvalidParameterErr();
 
         totalAmountFunded += _amount;
         projectFunds[msg.sender] += _amount;
-        funders.push(msg.sender);
+        fundes.push(msg.sender);
         emit projectFunded(address(this), msg.sender, _amount);
         bool success = racksPM_ERC20.transferFrom(
             msg.sender,
@@ -296,7 +306,7 @@ contract Project is Ownable, AccessControl {
                 address(this)
             );
             uint256 projectBalanceEther = address(this).balance;
-            (bool existNext, uint256 i) = contributorList.getNextNode(0);
+            (bool existNext, uint256 i) = memberList.getNextNode(0);
 
             while (i != 0 && existNext) {
                 address contrAddress = projectMember[i].wallet;
@@ -304,7 +314,7 @@ contract Project is Ownable, AccessControl {
                     bool successTransfer = racksPM_ERC20.transfer(
                         contrAddress,
                         (projectBalanceERC20 *
-                            participationOfMember[contrAddress]) / 100
+                            membersParticipation[contrAddress]) / 100
                     );
                     if (!successTransfer) revert Project_Erc20TransferFailed();
                 }
@@ -312,36 +322,34 @@ contract Project is Ownable, AccessControl {
                 if (address(this).balance > 0) {
                     (bool success, ) = contrAddress.call{
                         value: (projectBalanceEther *
-                            participationOfMember[contrAddress]) / 100
+                            membersParticipation[contrAddress]) / 100
                     }("");
                     if (!success) revert Project_TransferGiveAwayFailed();
                 }
-                (existNext, i) = contributorList.getNextNode(i);
+                (existNext, i) = memberList.getNextNode(i);
             }
         }
     }
 
     /**
-     * @notice Increase Contributor's reputation
+     * @notice Increase member's reputation
      * @dev Only callable by Admins internally
      */
-    function increaseContributorReputation(
+    function increaseMemberReputation(
         uint256 _reputationPointsReward,
         uint256 _index
     ) private onlyAdmin isNotDeleted {
         unchecked {
-            Member memory _contributor = projectMember[_index];
-            uint256 grossReputationPoints = _contributor.reputationPoints +
+            Member memory _member = projectMember[_index];
+            uint256 grossReputationPoints = _member.reputationPoints +
                 _reputationPointsReward;
 
-            while (
-                grossReputationPoints >= (_contributor.reputationLevel * 100)
-            ) {
-                grossReputationPoints -= (_contributor.reputationLevel * 100);
-                _contributor.reputationLevel++;
+            while (grossReputationPoints >= (_member.reputationLevel * 100)) {
+                grossReputationPoints -= (_member.reputationLevel * 100);
+                _member.reputationLevel++;
             }
-            _contributor.reputationPoints = grossReputationPoints;
-            projectMember[_index] = _contributor;
+            _member.reputationPoints = grossReputationPoints;
+            projectMember[_index] = _member;
         }
     }
 
@@ -356,11 +364,13 @@ contract Project is Ownable, AccessControl {
 
     function deleteProject() public onlyAdmin isNotDeleted isEditable {
         projectState = DELETED;
+
         racksPM.deleteProject();
+
         if (racksPM_ERC20.balanceOf(address(this)) > 0) {
             unchecked {
-                for (uint256 i = 0; i < funders.length; i++) {
-                    address funder = funders[i];
+                for (uint256 i = 0; i < fundes.length; i++) {
+                    address funder = fundes[i];
                     uint256 amount = projectFunds[funder];
                     if (amount > 0) {
                         projectFunds[funder] = 0;
@@ -378,18 +388,24 @@ contract Project is Ownable, AccessControl {
     }
 
     function removeMember(
-        address _contributor,
+        address _member,
         bool _returnColateral
     ) public onlyAdmin isNotDeleted {
-        if (!isMemberInProject(_contributor)) revert Project_NotMemberErr();
-        uint256 id = contributorId[_contributor];
-        contributorId[_contributor] = 0;
-        contributorList.remove(id);
+        if (!isMemberInProject(_member)) revert Project_NotMemberErr();
+        uint256 id = memberId[_member];
+        memberId[_member] = 0;
+        memberList.remove(id);
 
         if (_returnColateral && colateralCost > 0) {
-            bool success = racksPM_ERC20.transfer(_contributor, colateralCost);
+            bool success = racksPM_ERC20.transfer(_member, colateralCost);
             if (!success) revert Project_Erc20TransferFailed();
         }
+    }
+
+    function getMemberData(
+        address _memberAddress
+    ) internal returns (Member memory) {
+        return racksPM.getMemberData();
     }
 
     ////////////////////////
@@ -398,7 +414,7 @@ contract Project is Ownable, AccessControl {
 
     /**
      * @notice  the Project State
-     * @dev Only callable by Admins when the project has no Contributor yet and is pending.
+     * @dev Only callable by Admins when the project has no member yet and is pending.
      */
     function approveProject() external onlyAdmin isNotPaused isNotDeleted {
         if (projectState == PENDING) projectState = ACTIVE;
@@ -406,7 +422,7 @@ contract Project is Ownable, AccessControl {
 
     /**
      * @notice  the Project Name
-     * @dev Only callable by Admins when the project has no Contributor yet.
+     * @dev Only callable by Admins when the project has no member yet.
      */
     function setName(
         string memory _name
@@ -417,7 +433,7 @@ contract Project is Ownable, AccessControl {
 
     /**
      * @notice Edit the Colateral Cost
-     * @dev Only callable by Admins when the project has no Contributor yet.
+     * @dev Only callable by Admins when the project has no member yet.
      */
     function setColateralCost(
         uint256 _colateralCost
@@ -428,7 +444,7 @@ contract Project is Ownable, AccessControl {
 
     /**
      * @notice Edit the Reputation Level
-     * @dev Only callable by Admins when the project has no Contributor yet.
+     * @dev Only callable by Admins when the project has no member yet.
      */
     function setReputationLevel(
         uint256 _reputationLevel
@@ -439,14 +455,13 @@ contract Project is Ownable, AccessControl {
 
     /**
      * @notice Edit the Reputation Level
-     * @dev Only callable by Admins when the project has no Contributor yet.
+     * @dev Only callable by Admins when the project has no member yet.
      */
     function setMaxMemberNumber(
         uint256 _maxMemberNumber
     ) external onlyAdmin isNotPaused isNotDeleted {
-        if (
-            _maxMemberNumber <= 0 || _maxMemberNumber < contributorList.sizeOf()
-        ) revert Project_InvalidParameterErr();
+        if (_maxMemberNumber <= 0 || _maxMemberNumber < memberList.sizeOf())
+            revert Project_InvalidParameterErr();
         maxMemberNumber = _maxMemberNumber;
     }
 
@@ -459,7 +474,7 @@ contract Project is Ownable, AccessControl {
         return name;
     }
 
-    /// @notice Get the colateral cost to enter as contributor
+    /// @notice Get the colateral cost to enter as member
     function getColateralCost() external view returns (uint256) {
         return colateralCost;
     }
@@ -469,54 +484,53 @@ contract Project is Ownable, AccessControl {
         return reputationLevel;
     }
 
-    /// @notice Get the maximum contributor that can be in the project
+    /// @notice Get the maximum member that can be in the project
     function getMaxMember() external view returns (uint256) {
         return maxMemberNumber;
     }
 
-    /// @notice Get total number of contributors
+    /// @notice Get total number of members
     function getNumberOfMember() external view returns (uint256) {
-        return contributorList.sizeOf();
+        return memberList.sizeOf();
     }
 
-    /// @notice Get all contributor addresses
+    /// @notice Get all member addresses
     function getAllMemberAddress() external view returns (address[] memory) {
-        address[] memory allMember = new address[](contributorList.sizeOf());
+        address[] memory allMember = new address[](memberList.sizeOf());
 
         uint256 j = 0;
-        (bool existNext, uint256 i) = contributorList.getNextNode(0);
+        (bool existNext, uint256 i) = memberList.getNextNode(0);
 
         while (i != 0 && existNext) {
             allMember[j] = projectMember[i].wallet;
             j++;
-            (existNext, i) = contributorList.getNextNode(i);
+            (existNext, i) = memberList.getNextNode(i);
         }
 
         return allMember;
     }
 
-    /// @notice Get contributor by address
-    function getContributorByAddress(
+    /// @notice Get member by address
+    function getmemberByAddress(
         address _account
     ) external view onlyAdmin returns (Member memory) {
-        uint256 id = contributorId[_account];
+        uint256 id = memberId[_account];
+
         return projectMember[id];
     }
 
-    /// @notice Return true if the address is a contributor in the project
-    function isMemberInProject(
-        address _contributor
-    ) public view returns (bool) {
-        return contributorId[_contributor] != 0;
+    /// @notice Return true if the address is a member in the project
+    function isMemberInProject(address _member) public view returns (bool) {
+        return memberId[_member] != 0;
     }
 
     /// @notice Get the participation weight in percent
-    function getContributorParticipation(
-        address _contributor
+    function getmemberParticipation(
+        address _member
     ) external view returns (uint256) {
         if (projectState != ProjectState.Finished)
             revert Project_NotCompletedErr();
-        return participationOfMember[_contributor];
+        return membersParticipation[_member];
     }
 
     /// @notice Get the balance of funds given by an address
