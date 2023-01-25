@@ -4,7 +4,7 @@ pragma solidity ^0.8.7;
 error Project_IsNotEditableErr();
 error Project_ProjectFinishedErr();
 error Project_NotAdminErr();
-error Project_NotContributorErr();
+error Project_NotMemberErr();
 error Project_IsPausedErr();
 error Project_IsPendingErr();
 error Project_IsDeletedErr();

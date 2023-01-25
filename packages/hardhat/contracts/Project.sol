@@ -75,8 +75,7 @@ contract Project is Ownable, AccessControl {
      * @notice Check that user is Contributor
      */
     modifier onlyContributor() {
-        if (!racksPM.isWalletContributor(msg.sender))
-            revert Project_NotContributorErr();
+        if (!racksPM.isWalletMember(msg.sender)) revert Project_NotMemberErr();
         _;
     }
 
@@ -149,14 +148,14 @@ contract Project is Ownable, AccessControl {
         isNotDeleted
         isNotPending
     {
-        if (isContributorInProject(msg.sender))
+        if (isMemberInProject(msg.sender))
             revert Project_MemberAlreadyExistsErr();
         if (contributorList.sizeOf() == maxMemberNumber)
             revert Project_MaxMembersNumberExceededErr();
 
-        Member memory contributor = racksPM.getContributorData(msg.sender);
+        Member memory contributor = racksPM.getMemberData(msg.sender);
 
-        if (racksPM.isContributorBanned(contributor.wallet))
+        if (racksPM.isMemberBanned(contributor.wallet))
             revert Project_MemberIsBannedErr();
         if (contributor.reputationLevel < reputationLevel)
             revert Project_MemberHasNoReputationEnoughErr();
@@ -199,8 +198,8 @@ contract Project is Ownable, AccessControl {
         uint256 totalParticipationWeight = 0;
         unchecked {
             for (uint256 i = 0; i < _contributors.length; i++) {
-                if (!isContributorInProject(_contributors[i]))
-                    revert Project_NotContributorErr();
+                if (!isMemberInProject(_contributors[i]))
+                    revert Project_NotMemberErr();
 
                 uint256 participationWeight = _participationWeights[i];
 
@@ -220,10 +219,7 @@ contract Project is Ownable, AccessControl {
                     participationOfMember[contrAddress]) / 100;
 
                 increaseContributorReputation(reputationToIncrease, i);
-                racksPM.setAccountToContributorData(
-                    contrAddress,
-                    projectMember[i]
-                );
+                racksPM.setAccountToMemberData(contrAddress, projectMember[i]);
 
                 if (colateralCost > 0) {
                     bool success = racksPM_ERC20.transfer(
@@ -381,12 +377,11 @@ contract Project is Ownable, AccessControl {
         }
     }
 
-    function removeContributor(
+    function removeMember(
         address _contributor,
         bool _returnColateral
     ) public onlyAdmin isNotDeleted {
-        if (!isContributorInProject(_contributor))
-            revert Project_NotContributorErr();
+        if (!isMemberInProject(_contributor)) revert Project_NotMemberErr();
         uint256 id = contributorId[_contributor];
         contributorId[_contributor] = 0;
         contributorList.remove(id);
@@ -509,7 +504,7 @@ contract Project is Ownable, AccessControl {
     }
 
     /// @notice Return true if the address is a contributor in the project
-    function isContributorInProject(
+    function isMemberInProject(
         address _contributor
     ) public view returns (bool) {
         return contributorId[_contributor] != 0;
