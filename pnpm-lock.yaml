@@ -30,6 +30,7 @@ importers:
       '@nomiclabs/hardhat-ethers': ^2.2.2
       '@nomiclabs/hardhat-solhint': ^3.0.0
       '@openzeppelin/contracts': ^4.8.1
+      '@openzeppelin/contracts-upgradeable': ^4.8.1
       '@typescript-eslint/eslint-plugin': ^5.33.0
       '@typescript-eslint/parser': ^5.33.0
       dotenv: ^16.0.3
@@ -56,6 +57,7 @@ importers:
       '@nomiclabs/hardhat-ethers': 2.2.2_ljvdvd7rotyr7m3znq3ladptlm
       '@nomiclabs/hardhat-solhint': 3.0.0_hardhat@2.12.5
       '@openzeppelin/contracts': 4.8.1
+      '@openzeppelin/contracts-upgradeable': 4.8.1
       '@typescript-eslint/eslint-plugin': 5.48.0_k73wpmdolxikpyqun3p36akaaq
       '@typescript-eslint/parser': 5.48.0_iukboom6ndih5an6iafl45j2fe
       dotenv: 16.0.3
@@ -2581,6 +2583,10 @@ packages:
     resolution: {integrity: sha512-65/TPpOJP1i3K4lBJMnWqPUJ6zuOtzhtagDvydAWbEXpbFYA0oMKKyLb95NFZZP0lSh/4b6K+DQlzvYQJQQePg==}
     dependencies:
       '@octokit/openapi-types': 14.0.0
+    dev: true
+
+  /@openzeppelin/contracts-upgradeable/4.8.1:
+    resolution: {integrity: sha512-1wTv+20lNiC0R07jyIAbHU7TNHKRwGiTGRfiNnA8jOWjKT98g5OgLpYWOi40Vgpk8SPLA9EvfJAbAeIyVn+7Bw==}
     dev: true
 
   /@openzeppelin/contracts/4.8.1:
