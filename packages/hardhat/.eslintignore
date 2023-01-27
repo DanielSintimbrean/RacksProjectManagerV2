@@ -2,4 +2,3 @@ artifacts/*
 cache/*
 dist/*
 types/contracts/*
-prettier.config.cjs

@@ -13,5 +13,6 @@ declare module "hardhat/types/runtime" {
   export interface HardhatRuntimeEnvironment {
     setNetworkMapping: typeof setNetworkMapping;
     env: typeof env;
+    localChains: string[];
   }
 }

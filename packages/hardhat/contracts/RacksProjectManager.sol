@@ -207,18 +207,35 @@ contract RacksProjectManager is
     /// Increase Member's Reputation Level
     function increaseMemberRP(
         address _account,
-        uint256 grossReputationPoints
+        uint256 _reputationPointsReward
     ) public onlyAdmin {
-        if (grossReputationPoints <= 0)
+        if (_reputationPointsReward <= 0)
             revert RacksProjectManager_InvalidParameterErr();
-        Member memory contributor = membersData[_account];
 
-        while (grossReputationPoints >= (contributor.reputationLevel * 100)) {
-            grossReputationPoints -= (contributor.reputationLevel * 100);
-            contributor.reputationLevel++;
-        }
-        contributor.reputationPoints = grossReputationPoints;
-        membersData[_account] = contributor;
+        Member memory member = membersData[_account];
+
+        uint256 grossReputationPoints = member.reputationPoints +
+            _reputationPointsReward;
+
+        member.reputationLevel = grossReputationPoints / 100;
+        member.reputationPoints = grossReputationPoints % 100;
+
+        /// 1 -> 2 | 100
+        /// 2 -> 3 | 200
+        /// 3 -> 4 | 300
+        /// 4 -> 5 | 400
+
+        /// 100 -> 2
+        /// 300 -> 3
+        /// 600 -> 4
+        /// 1000 -> 5
+        /// 1500 -> 6
+        /// 2100 -> 7
+        /// 2800 -> 8
+        /// 3600 -> 9
+        /// 4500 -> 10
+
+        membersData[_account] = member;
     }
 
     function setIsPaused(bool _newPausedValue) public onlyAdmin {

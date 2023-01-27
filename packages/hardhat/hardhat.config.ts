@@ -42,6 +42,7 @@ extendEnvironment(async (hre) => {
   const { setNetworkMapping } = require("./constants/network-mapping/index.ts");
   hre.setNetworkMapping = setNetworkMapping;
   hre.env = env;
+  hre.localChains = ["hardhat", "localhost"];
 });
 
 export default config;

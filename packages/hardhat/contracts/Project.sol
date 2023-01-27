@@ -228,8 +228,8 @@ contract Project is Ownable, AccessControl {
                 uint256 reputationToIncrease = (_totalReputationPointsReward *
                     membersParticipation[contrAddress]) / 100;
 
-                increaseMemberReputation(reputationToIncrease, i);
-                racksPM.setAccountToMemberData(contrAddress, projectMember[i]);
+                //racksPM. (reputationToIncrease, i);
+                // racksPM.setAccountToMemberData(contrAddress, projectMember[i]);
 
                 if (colateralCost > 0) {
                     bool success = racksPM_ERC20.transfer(
@@ -309,7 +309,7 @@ contract Project is Ownable, AccessControl {
             (bool existNext, uint256 i) = memberList.getNextNode(0);
 
             while (i != 0 && existNext) {
-                address contrAddress = projectMember[i].wallet;
+                address contrAddress = memberAddress[i];
                 if (racksPM_ERC20.balanceOf(address(this)) > 0) {
                     bool successTransfer = racksPM_ERC20.transfer(
                         contrAddress,
@@ -328,28 +328,6 @@ contract Project is Ownable, AccessControl {
                 }
                 (existNext, i) = memberList.getNextNode(i);
             }
-        }
-    }
-
-    /**
-     * @notice Increase member's reputation
-     * @dev Only callable by Admins internally
-     */
-    function increaseMemberReputation(
-        uint256 _reputationPointsReward,
-        uint256 _index
-    ) private onlyAdmin isNotDeleted {
-        unchecked {
-            Member memory _member = projectMember[_index];
-            uint256 grossReputationPoints = _member.reputationPoints +
-                _reputationPointsReward;
-
-            while (grossReputationPoints >= (_member.reputationLevel * 100)) {
-                grossReputationPoints -= (_member.reputationLevel * 100);
-                _member.reputationLevel++;
-            }
-            _member.reputationPoints = grossReputationPoints;
-            projectMember[_index] = _member;
         }
     }
 
@@ -404,8 +382,8 @@ contract Project is Ownable, AccessControl {
 
     function getMemberData(
         address _memberAddress
-    ) internal returns (Member memory) {
-        return racksPM.getMemberData();
+    ) internal view returns (Member memory) {
+        return racksPM.getMemberData(_memberAddress);
     }
 
     ////////////////////////
@@ -502,21 +480,12 @@ contract Project is Ownable, AccessControl {
         (bool existNext, uint256 i) = memberList.getNextNode(0);
 
         while (i != 0 && existNext) {
-            allMember[j] = projectMember[i].wallet;
+            allMember[j] = memberAddress[i];
             j++;
             (existNext, i) = memberList.getNextNode(i);
         }
 
         return allMember;
-    }
-
-    /// @notice Get member by address
-    function getmemberByAddress(
-        address _account
-    ) external view onlyAdmin returns (Member memory) {
-        uint256 id = memberId[_account];
-
-        return projectMember[id];
     }
 
     /// @notice Return true if the address is a member in the project

@@ -7,11 +7,12 @@
     "precommit": "lint-staged",
     "test": "hardhat test",
     "compile": "hardhat compile",
+    "deploy": "hardhat run scripts/deployAll.ts --network hardhat",
     "deploy:goerli": "hardhat run scripts/deployAll.ts --network goerli",
     "deploy:localhost": "hardhat run scripts/deployAll.ts --network localhost",
     "dev": "hardhat run scripts/dev.ts",
     "build": "tsc --build",
-    "lint": "eslint . && hardhat check",
+    "lint": "eslint . && solhint ./contracts/**/*.sol",
     "format": "prettier -w . && prettier -w ./**/*.sol"
   },
   "keywords": [],
