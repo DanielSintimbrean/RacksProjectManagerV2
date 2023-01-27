@@ -1,16 +1,20 @@
 import * as hre from "hardhat";
 import {
-  deployLock,
   deployMrCryptoMock,
   deployRacksProjectManager,
+  deployProxy,
+  deployERC20Mock,
 } from "../deploy";
 
 async function main() {
   await hre.run("compile");
 
-  await deployLock();
   const { MrCryptoNFT } = await deployMrCryptoMock();
-  await deployRacksProjectManager(MrCryptoNFT.address);
+  const { ERC20Mock } = await deployERC20Mock();
+  const { RacksProjectManager } = await deployRacksProjectManager(
+    MrCryptoNFT.address,
+  );
+  await deployProxy(RacksProjectManager.address, ERC20Mock.address);
 
   const network = hre.network.name;
 

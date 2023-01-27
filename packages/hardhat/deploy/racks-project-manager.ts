@@ -17,6 +17,8 @@ export const deployRacksProjectManager = async (mrCryptoAddress: string) => {
     ...argsHolderValidation,
   );
 
+  await HolderValidation.deployed();
+
   const argsRacksPM: Parameters<typeof RacksProjectManager_Factory.deploy> = [
     HolderValidation.address,
   ];
@@ -24,6 +26,8 @@ export const deployRacksProjectManager = async (mrCryptoAddress: string) => {
   const RacksProjectManager = await RacksProjectManager_Factory.deploy(
     ...argsRacksPM,
   );
+
+  await RacksProjectManager.deployed();
 
   setNetworkMapping(
     network.name,

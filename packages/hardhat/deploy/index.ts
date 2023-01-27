@@ -1,5 +1,11 @@
-import { deployLock } from "./lock";
 import { deployMrCryptoMock } from "./mrcrypto-mock";
 import { deployRacksProjectManager } from "./racks-project-manager";
+import { deployProxy } from "./proxy";
+import { deployERC20Mock } from "./erc20-mock";
 
-export { deployLock, deployMrCryptoMock, deployRacksProjectManager };
+export {
+  deployMrCryptoMock,
+  deployRacksProjectManager,
+  deployProxy,
+  deployERC20Mock,
+};
