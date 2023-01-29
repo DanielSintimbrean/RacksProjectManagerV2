@@ -40,10 +40,13 @@ const config: HardhatUserConfig = {
 extendEnvironment(async (hre) => {
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { setNetworkMapping } = require("./utils/network-mapping.ts");
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
+  const { networkMapping } = require("./constants/network-mapping/index.ts");
 
   hre.setNetworkMapping = setNetworkMapping;
   hre.env = env;
   hre.localChains = ["hardhat", "localhost"];
+  hre.networkMapping = networkMapping;
 });
 
 export default config;

@@ -10,6 +10,7 @@ declare module "iron-session" {
     user?: {
       address: string;
       name: string;
+      registered: boolean;
     };
   }
 }

@@ -26,6 +26,9 @@ export default function Header() {
       </div>
       <nav className="">
         <ul className="m-5 flex flex-row gap-5">
+          {authenticated && !session.user.registered && (
+            <button className="btn-secondary btn">Registrare</button>
+          )}
           <li className="">
             <Link href="/">Home</Link>
           </li>

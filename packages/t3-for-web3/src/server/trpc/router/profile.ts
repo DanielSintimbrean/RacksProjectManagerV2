@@ -11,7 +11,11 @@ export const profileRouter = router({
         data: { name: input.newName },
       });
 
-      ctx.session.user = { name: input.newName, address: ctx.user.address };
+      ctx.session.user = {
+        name: input.newName,
+        address: ctx.user.address,
+        registered: ctx.user.registered,
+      };
 
       await ctx.session.save();
 

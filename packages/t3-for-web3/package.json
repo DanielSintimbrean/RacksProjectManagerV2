@@ -11,7 +11,8 @@
     "check-types": "tsc --noemit",
     "eslint": "eslint .",
     "lint": "npm run eslint && npm run check-types",
-    "start": "next start"
+    "start": "next start",
+    "prisma:reset": "prisma db push --force-reset"
   },
   "dependencies": {
     "@babel/core": "^7.20.7",
@@ -27,6 +28,7 @@
     "@trpc/react-query": "^10.0.0",
     "@trpc/server": "^10.0.0",
     "@typechain/ethers-v5": "^10.2.0",
+    "daisyui": "^2.49.0",
     "ethers": "^5.7.2",
     "iron-session": "^6.3.1",
     "my-hardhat": "*",

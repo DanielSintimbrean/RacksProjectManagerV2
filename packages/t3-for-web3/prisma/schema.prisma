@@ -17,13 +17,18 @@ model Example {
 }
 
 model User {
-  id        String   @id @default(cuid())
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  address   String   @unique
-  name      String
-  Project   Project? @relation(fields: [projectId], references: [id])
-  projectId String?
+  id              String   @id @default(cuid())
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+  address         String   @unique
+  name            String
+  Project         Project? @relation(fields: [projectId], references: [id])
+  projectId       String?
+  registered      Boolean  @default(false)
+  discordUsername String?
+  twitterUsername String?
+  githubUsername  String?
+  avatar          String?
 }
 
 model Project {

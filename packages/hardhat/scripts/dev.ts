@@ -1,8 +1,6 @@
 import * as hre from "hardhat";
-import { ethers } from "hardhat";
-import { networkMapping } from "../constants/network-mapping";
+import { ethers, networkMapping } from "hardhat";
 
-const { localhost: localhostContracts } = networkMapping;
 /**
  * This script starts a Hardhat node and deploys the contracts to it.
  * Used to test the contracts locally.
@@ -20,6 +18,8 @@ async function main() {
   await hre.run("run", {
     script: "./scripts/deployAll.ts",
   });
+
+  const localhostContracts = networkMapping.localhost;
 
   const [deployer] = await ethers.getSigners();
   const MrCryptoContract = await ethers.getContractAt(

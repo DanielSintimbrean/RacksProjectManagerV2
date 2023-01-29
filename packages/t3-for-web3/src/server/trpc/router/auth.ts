@@ -83,7 +83,11 @@ export const authRouter = router({
         }
 
         ctx.session.siwe = fields.data;
-        ctx.session.user = { address: siweMessage.address, name: user.name };
+        ctx.session.user = {
+          address: siweMessage.address,
+          name: user.name,
+          registered: user.registered,
+        };
 
         console.log(ctx.session);
         await ctx.session.save();

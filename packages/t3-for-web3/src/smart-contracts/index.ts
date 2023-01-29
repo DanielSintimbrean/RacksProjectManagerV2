@@ -2,8 +2,10 @@ import { ethers } from "ethers";
 import {
   RacksProjectManager__factory,
   HolderValidation__factory,
+  Project__factory,
 } from "my-hardhat";
 import { localhost } from "my-hardhat/constants/network-mapping.json";
+
 const provider = new ethers.providers.JsonRpcProvider(
   "http://127.0.0.1:8545/",
   {
@@ -18,9 +20,13 @@ export const racksProjectManager = RacksProjectManager__factory.connect(
 );
 
 export const holderValidation = HolderValidation__factory.connect(
-  "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+  localhost.HolderValidation,
   provider
 );
+
+export const Project = (address: string) => {
+  return Project__factory.connect(address, provider);
+};
 
 console.log("RacksProjectManager", racksProjectManager.address);
 console.log("HolderValidation", holderValidation.address);
