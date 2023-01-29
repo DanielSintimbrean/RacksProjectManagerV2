@@ -1,14 +1,17 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
 import Link from "next/link";
+import { useState } from "react";
 import { useAccount } from "wagmi";
 import { useAuth } from "../hooks/useAuth";
 import { useSession } from "../hooks/useSession";
+import RegisterModal from "./RegisterModal";
 
 export default function Header() {
   const session = useSession();
   const authenticated = session.authenticated;
   const { isDisconnected, address } = useAccount();
   const { logout, isLoggingOut } = useAuth();
+  const [isOpen, setIsOpen] = useState(false);
 
   // Need to use isLoggingOut to avoid to much re-renders when logging out.
   if (
@@ -27,7 +30,12 @@ export default function Header() {
       <nav className="">
         <ul className="m-5 flex flex-row gap-5">
           {authenticated && !session.user.registered && (
-            <button className="btn-secondary btn">Registrare</button>
+            <button
+              className="btn-secondary btn"
+              onClick={() => setIsOpen(true)}
+            >
+              Registrare
+            </button>
           )}
           <li className="">
             <Link href="/">Home</Link>
@@ -37,6 +45,7 @@ export default function Header() {
           </li>
         </ul>
       </nav>
+      <RegisterModal isOpen={isOpen} setIsOpen={setIsOpen} />
     </header>
   );
 }
