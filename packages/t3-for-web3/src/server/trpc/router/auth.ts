@@ -3,10 +3,21 @@ import { z } from "zod";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { siweMessageSchema } from "../../../utils/validator/siwe";
 import { TRPCError } from "@trpc/server";
-import { holderValidation, racksProjectManager } from "@smart-contracts";
+import { racksProjectManager } from "@smart-contracts";
 
 export const authRouter = router({
-  getSession: publicProcedure.query(({ ctx }) => {
+  getSession: publicProcedure.query(async ({ ctx }) => {
+    if (ctx.session.user && ctx.session.user.registered === "false") {
+      const isMember = await racksProjectManager.isWalletMember(
+        ctx.session.user.address
+      );
+
+      if (isMember) {
+        ctx.session.user.registered = "pending";
+        await ctx.session.save();
+      }
+    }
+
     return ctx.session;
   }),
   getSecretMessage: protectedProcedure.query(() => {
@@ -88,6 +99,7 @@ export const authRouter = router({
 
         let registered: "false" | "true" | "pending" = "false";
 
+        console.log({ isMember });
         if (isMember) {
           registered = "pending";
         }

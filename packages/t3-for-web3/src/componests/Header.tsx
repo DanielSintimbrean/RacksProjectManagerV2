@@ -32,12 +32,20 @@ export default function Header() {
       </div>
       <nav className="">
         <ul className="m-5 flex flex-row gap-5">
-          {authenticated && !session.user.registered && (
+          {authenticated && session.user.registered == "false" && (
             <button
-              className="btn-secondary btn"
+              className="btn-primary btn"
               onClick={() => registerContributor && registerContributor()}
             >
-              Registrare
+              Regístrate como member
+            </button>
+          )}
+          {authenticated && session.user.registered == "pending" && (
+            <button
+              className="btn-secondary btn"
+              onClick={() => setIsOpen(true)}
+            >
+              Completa el registro
             </button>
           )}
           <li className="">
