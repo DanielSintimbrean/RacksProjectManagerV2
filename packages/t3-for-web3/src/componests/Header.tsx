@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useAccount } from "wagmi";
 import { useAuth } from "../hooks/useAuth";
 import { useSession } from "../hooks/useSession";
+import { useRegisterContributor } from "../hooks/wagmi/useRegisterContributor";
 import RegisterModal from "./RegisterModal";
 
 export default function Header() {
@@ -22,6 +23,8 @@ export default function Header() {
     logout();
   }
 
+  const { registerContributor } = useRegisterContributor();
+
   return (
     <header className="mx-5  flex flex-row items-center justify-between rounded-b-xl bg-gradient-to-br from-purple-600 to-purple-700 text-red-50">
       <div className="m-5">
@@ -32,7 +35,7 @@ export default function Header() {
           {authenticated && !session.user.registered && (
             <button
               className="btn-secondary btn"
-              onClick={() => setIsOpen(true)}
+              onClick={() => registerContributor && registerContributor()}
             >
               Registrare
             </button>

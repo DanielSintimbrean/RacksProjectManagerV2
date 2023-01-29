@@ -82,11 +82,25 @@ export const authRouter = router({
           });
         }
 
+        const isMember = await racksProjectManager.isWalletMember(
+          fields.data.address
+        );
+
+        let registered: "false" | "true" | "pending" = "false";
+
+        if (isMember) {
+          registered = "pending";
+        }
+
+        if (user.registered) {
+          registered = "true";
+        }
+
         ctx.session.siwe = fields.data;
         ctx.session.user = {
           address: siweMessage.address,
           name: user.name,
-          registered: user.registered,
+          registered,
         };
 
         console.log(ctx.session);
