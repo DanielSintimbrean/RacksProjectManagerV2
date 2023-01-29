@@ -4,7 +4,7 @@
 import "hardhat/types/config";
 import "hardhat/types/runtime";
 
-import { setNetworkMapping } from "./../../constants/network-mapping/index";
+import { setNetworkMapping } from "../../utils/network-mapping";
 import { env } from "./../../env";
 
 declare module "hardhat/types/runtime" {

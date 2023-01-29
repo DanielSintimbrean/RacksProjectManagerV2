@@ -1,5 +1,8 @@
 import * as hre from "hardhat";
+import { ethers } from "hardhat";
+import { networkMapping } from "../constants/network-mapping";
 
+const { localhost: localhostContracts } = networkMapping;
 /**
  * This script starts a Hardhat node and deploys the contracts to it.
  * Used to test the contracts locally.
@@ -17,6 +20,14 @@ async function main() {
   await hre.run("run", {
     script: "./scripts/deployAll.ts",
   });
+
+  const [deployer] = await ethers.getSigners();
+  const MrCryptoContract = await ethers.getContractAt(
+    "MrCryptoNFT",
+    localhostContracts.MrCryptoMock,
+  );
+
+  await MrCryptoContract.connect(deployer).mint(1);
 
   console.log("\n==========================");
   console.log("== Hardhat node started ==");

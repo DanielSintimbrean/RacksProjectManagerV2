@@ -27,8 +27,7 @@ contract RacksProjectManager is
     IRacksProjectManager,
     Initializable,
     OwnableUpgradeable,
-    AccessControlUpgradeable,
-    IHolderValidation
+    AccessControlUpgradeable
 {
     /// @notice interfaces
     /// @custom:oz-upgrades-unsafe-allow state-variable-immutable
@@ -367,9 +366,7 @@ contract RacksProjectManager is
         projectsList.remove(id);
     }
 
-    function isHolder(
-        address _account
-    ) external view override returns (address) {
-        return holderValidation.isHolder(_account);
+    function isHolder(address _account) external view returns (bool) {
+        return holderValidation.isHolder(_account) != address(0);
     }
 }

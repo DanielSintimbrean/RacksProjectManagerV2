@@ -3,6 +3,7 @@ import { z } from "zod";
 import { router, publicProcedure, protectedProcedure } from "../trpc";
 import { siweMessageSchema } from "../../../utils/validator/siwe";
 import { TRPCError } from "@trpc/server";
+import { holderValidation, racksProjectManager } from "@smart-contracts";
 
 export const authRouter = router({
   getSession: publicProcedure.query(({ ctx }) => {
@@ -46,16 +47,27 @@ export const authRouter = router({
         signature: z.string(),
       })
     )
-    .output(z.object({ ok: z.boolean() }))
+    .output(z.object({ ok: z.boolean(), error: z.string().optional() }))
     .mutation(async ({ input, ctx }) => {
       try {
         const siweMessage = new SiweMessage(input.message as SiweMessage);
 
         // Verify signature if not valid throw an error
+        console.log({ siweMessage });
         const fields = await siweMessage.verify({
           signature: input.signature,
           nonce: ctx.session.nonce,
         });
+
+        // Verify is holder
+        const isHolder = await racksProjectManager.isHolder(
+          fields.data.address
+        );
+
+        if (!isHolder) {
+          console.log("Not a holder", fields.data.address);
+          return { ok: false, error: "Not a holder" };
+        }
 
         let user = await ctx.prisma.user.findUnique({
           where: { address: fields.data.address },

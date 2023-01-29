@@ -2,3 +2,4 @@ types/contracts/*
 dist/*
 artifacts/*
 cache/*
+constants/network-mapping/*

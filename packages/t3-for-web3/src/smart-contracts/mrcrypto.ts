@@ -1,5 +1,5 @@
 import { ethers } from "ethers";
-import { Mrcrypto__factory } from "../types";
+import { Mrcrypto__factory } from "./types";
 
 const provider = new ethers.providers.JsonRpcProvider(
   "https://polygon.llamarpc.com"

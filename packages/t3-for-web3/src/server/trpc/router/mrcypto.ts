@@ -1,5 +1,5 @@
-import type { MrCryptoMetadataType } from "../../../smart-contracts/abi/metadata";
-import { MrCryptoContract } from "../../../smart-contracts/abi/mrcrypto";
+import type { MrCryptoMetadataType } from "../../../smart-contracts/metadata";
+import { MrCryptoContract } from "../../../smart-contracts/mrcrypto";
 import { ipfsGateway } from "../../../utils/ipfs";
 
 import { router, protectedProcedure } from "../trpc";
