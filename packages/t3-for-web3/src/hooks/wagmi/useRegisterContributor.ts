@@ -1,4 +1,8 @@
-import { useContractWrite, usePrepareContractWrite } from "wagmi";
+import {
+  useContractWrite,
+  usePrepareContractWrite,
+  useWaitForTransaction,
+} from "wagmi";
 import { racksProjectManager } from "@smart-contracts";
 import { RacksProjectManager__factory } from "my-hardhat";
 import { trpc } from "../../utils/trpc";
@@ -10,13 +14,17 @@ export const useRegisterContributor = () => {
     address: racksProjectManager.address as `0x${string}`,
     abi: RacksProjectManager__factory.abi,
     functionName: "registerMember",
+  });
+
+  const { write, data } = useContractWrite(config);
+
+  useWaitForTransaction({
+    hash: data?.hash,
+    confirmations: 6,
     onSuccess: () => {
-      // Refresh session
       trpcUtils.auth.invalidate();
     },
   });
-
-  const { write } = useContractWrite(config);
 
   return { registerContributor: write, error };
 };

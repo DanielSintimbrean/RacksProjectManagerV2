@@ -22,12 +22,19 @@ async function main() {
   const localhostContracts = networkMapping.localhost;
 
   const [deployer] = await ethers.getSigners();
+
   const MrCryptoContract = await ethers.getContractAt(
     "MrCryptoNFT",
     localhostContracts.MrCryptoMock,
   );
 
+  const RacksProjectManagerContract = await ethers.getContractAt(
+    "RacksProjectManager",
+    localhostContracts.RacksProjectManager,
+  );
+
   await MrCryptoContract.connect(deployer).mint(1);
+  await RacksProjectManagerContract.connect(deployer).registerMember();
 
   console.log("\n==========================");
   console.log("== Hardhat node started ==");

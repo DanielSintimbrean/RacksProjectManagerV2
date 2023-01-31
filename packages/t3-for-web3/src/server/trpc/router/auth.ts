@@ -75,6 +75,8 @@ export const authRouter = router({
           fields.data.address
         );
 
+        console.log({ isHolder });
+
         if (!isHolder) {
           console.log("Not a holder", fields.data.address);
           return { ok: false, error: "Not a holder" };
