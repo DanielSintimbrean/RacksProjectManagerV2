@@ -26,7 +26,7 @@ export default function Header() {
   const { registerContributor } = useRegisterContributor();
 
   return (
-    <header className="mx-5  flex flex-row items-center justify-between rounded-b-xl bg-gradient-to-br from-purple-600 to-purple-700 text-red-50">
+    <header className="mx-5 flex min-h-[10vh] flex-row items-center justify-between rounded-b-xl bg-gradient-to-br from-neutral to-neutral-focus text-red-50">
       <div className="m-5">
         <ConnectButton showBalance={false} accountStatus={"address"} />
       </div>

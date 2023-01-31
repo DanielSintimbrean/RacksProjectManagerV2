@@ -13,6 +13,7 @@ const config = {
     locales: ["en"],
     defaultLocale: "en",
   },
+  transpilePackages: ["t3-for-web3", "my-hardhat"],
   images: { domains: ["cloudflare-ipfs.com"] },
 };
 export default config;
