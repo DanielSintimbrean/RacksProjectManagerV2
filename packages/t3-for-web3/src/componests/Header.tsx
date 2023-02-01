@@ -1,4 +1,5 @@
 import { ConnectButton } from "@rainbow-me/rainbowkit";
+import Image from "next/image";
 import Link from "next/link";
 import { useState } from "react";
 import { useAccount } from "wagmi";
@@ -47,6 +48,18 @@ export default function Header() {
             >
               Completa el registro
             </button>
+          )}
+          {authenticated && session.user.registered == "true" && (
+            <div className="avatar">
+              <div className="mask mask-hexagon w-20">
+                <Image
+                  src={session.user.avatar || "/unrevealed.gif"}
+                  className=""
+                  alt="profile picture"
+                  fill={true}
+                />
+              </div>
+            </div>
           )}
           <li className="">
             <Link href="/">Home</Link>

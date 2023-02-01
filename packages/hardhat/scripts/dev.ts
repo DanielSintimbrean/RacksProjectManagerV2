@@ -33,7 +33,9 @@ async function main() {
     localhostContracts.RacksProjectManager,
   );
 
-  await MrCryptoContract.connect(deployer).mint(1);
+  await MrCryptoContract.connect(deployer).mint(6);
+  await MrCryptoContract.connect(deployer).reveal();
+
   await RacksProjectManagerContract.connect(deployer).registerMember();
 
   console.log("\n==========================");

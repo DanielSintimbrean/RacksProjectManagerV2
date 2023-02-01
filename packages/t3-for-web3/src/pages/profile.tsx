@@ -67,10 +67,10 @@ const ProfilePage: NextPage = () => {
         <div className="flex flex-col justify-center gap-4 text-center text-white"></div>
         <div className="flex flex-row justify-center gap-4 p-48">
           {mrcImages &&
-            mrcImages.data.map((mrcImage, i) => (
+            mrcImages.data.map((mrc, i) => (
               <Image
                 key={i}
-                src={mrcImage}
+                src={mrc.image}
                 width={250}
                 height={250}
                 alt={"MRC"}

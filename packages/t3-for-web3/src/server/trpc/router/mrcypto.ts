@@ -1,5 +1,5 @@
 import type { MrCryptoMetadataType } from "../../../smart-contracts/metadata";
-import { MrCryptoContract } from "../../../smart-contracts/mrcrypto";
+import { MrCryptoContract } from "../../../smart-contracts";
 import { ipfsGateway } from "../../../utils/ipfs";
 
 import { router, protectedProcedure } from "../trpc";
@@ -22,7 +22,10 @@ export const mrCryptoRouter = router({
       })
     )) as MrCryptoMetadataType[];
 
-    const data = mrcNftsData.map((nft) => ipfsGateway(nft.image));
+    const data = mrcNftsData.map((nft) => ({
+      id: nft.edition,
+      image: ipfsGateway(nft.image),
+    }));
 
     return { data };
   }),

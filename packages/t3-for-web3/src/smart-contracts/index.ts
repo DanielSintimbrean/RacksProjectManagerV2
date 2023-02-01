@@ -3,6 +3,7 @@ import {
   RacksProjectManager__factory,
   HolderValidation__factory,
   Project__factory,
+  MrCryptoNFT__factory,
 } from "my-hardhat";
 import { localhost } from "my-hardhat/constants/network-mapping.json";
 
@@ -27,6 +28,11 @@ export const holderValidation = HolderValidation__factory.connect(
 export const Project = (address: string) => {
   return Project__factory.connect(address, provider);
 };
+
+export const MrCryptoContract = MrCryptoNFT__factory.connect(
+  localhost.MrCryptoMock,
+  provider
+);
 
 console.log("RacksProjectManager", racksProjectManager.address);
 console.log("HolderValidation", holderValidation.address);

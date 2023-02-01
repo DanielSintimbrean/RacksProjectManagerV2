@@ -11,6 +11,7 @@ declare module "iron-session" {
       address: string;
       name: string;
       registered: "true" | "false" | "pending";
+      avatar?: string;
     };
   }
 }

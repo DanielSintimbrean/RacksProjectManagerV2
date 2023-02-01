@@ -7,7 +7,7 @@ export const deployMrCryptoMock = async () => {
   const args: Parameters<typeof MrCryptoNFT_Factory.deploy> = [
     "Mr. Crypto",
     "MRC",
-    "https://apinft.racksmafia.com/api/",
+    "ipfs://QmPKoP1YR5DtxfcSpFofVzZjPi7XA7UJpVMkbKSCKeMBQa/",
     "https://apinft.racksmafia.com/api/hidden.json",
   ];
 
