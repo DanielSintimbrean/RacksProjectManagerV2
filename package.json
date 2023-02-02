@@ -6,6 +6,7 @@
   ],
   "scripts": {
     "dev": "lerna run dev --concurrency=10 --parallel",
+    "start": "lerna run start --concurrency=10 --parallel",
     "build": "lerna run build --concurrency=10 --parallel",
     "lint": "lerna run lint --concurrency=10 --parallel",
     "test": "lerna run test --concurrency=10 --parallel",

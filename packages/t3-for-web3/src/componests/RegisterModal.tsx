@@ -1,7 +1,8 @@
 import { Dialog, Listbox, Transition } from "@headlessui/react";
 import { zodResolver } from "@hookform/resolvers/zod";
+import Image from "next/image";
 import { Fragment } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, useWatch } from "react-hook-form";
 import { z } from "zod";
 import { trpc } from "../utils/trpc";
 
@@ -22,9 +23,18 @@ export default function MyDialog({
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 }) {
-  const { register, handleSubmit, getValues, setValue } = useForm<SchemaType>({
-    resolver: zodResolver(schema),
+  const { register, handleSubmit, getValues, setValue, control } =
+    useForm<SchemaType>({
+      resolver: zodResolver(schema),
+    });
+
+  const watch = useWatch({
+    control,
+    defaultValue: { avatar: { id: "", image: "/unrevealed.gif" } },
   });
+
+  const id = watch.avatar?.id;
+  const image = watch.avatar?.image;
 
   const { data } = trpc.mrCrypto.getMrcNftImages.useQuery();
 
@@ -68,17 +78,42 @@ export default function MyDialog({
                 community 🎩.
               </Dialog.Description>
 
+              <div className="avatar">
+                <div className="mask mask-hexagon w-20">
+                  <Image
+                    src={image || "/unrevealed.gif"}
+                    className=""
+                    alt="profile picture"
+                    fill={true}
+                  />
+                </div>
+              </div>
+
               <form className="" onSubmit={handleSubmit((d) => console.log(d))}>
                 <Listbox
                   value={getValues("avatar")}
                   onChange={(v) => setValue("avatar", v)}
                 >
-                  <Listbox.Button>
-                    Mr.Crypto #{getValues("avatar")?.id}
+                  <Listbox.Button className={"input-primary input"}>
+                    Mr.Crypto #{id}
                   </Listbox.Button>
-                  <Listbox.Options>
+                  <Listbox.Options
+                    className={
+                      "absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                    }
+                  >
                     {data?.data?.map((mrc) => (
-                      <Listbox.Option key={mrc.id} value={mrc}>
+                      <Listbox.Option
+                        key={mrc.id}
+                        value={mrc}
+                        className={({ active }) =>
+                          `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                            active
+                              ? "bg-amber-100 text-amber-900"
+                              : "text-gray-900"
+                          }`
+                        }
+                      >
                         Mr.Crypto #{mrc.id}
                       </Listbox.Option>
                     ))}
