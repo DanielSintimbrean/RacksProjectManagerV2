@@ -3,18 +3,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import Image from "next/image";
 import { Fragment } from "react";
 import { useForm, useWatch } from "react-hook-form";
-import { z } from "zod";
 import { trpc } from "../utils/trpc";
-
-const schema = z.object({
-  name: z.string(),
-  github: z.string(),
-  discord: z.string(),
-  email: z.string(),
-  avatar: z.object({ id: z.string(), image: z.string() }),
-});
-
-type SchemaType = z.infer<typeof schema>;
+import type { RegisterMemberSchema } from "../utils/validator/registerMember";
+import { registerMemberSchema } from "../utils/validator/registerMember";
 
 export default function MyDialog({
   isOpen,
@@ -23,22 +14,31 @@ export default function MyDialog({
   isOpen: boolean;
   setIsOpen: (isOpen: boolean) => void;
 }) {
-  const { register, handleSubmit, getValues, setValue, control } =
-    useForm<SchemaType>({
-      resolver: zodResolver(schema),
-    });
+  const {
+    register,
+    handleSubmit,
+    getValues,
+    setValue,
+    control,
+    formState: { errors },
+  } = useForm<RegisterMemberSchema>({
+    resolver: zodResolver(registerMemberSchema),
+  });
 
   const watch = useWatch({
     control,
-    defaultValue: { avatar: { id: "", image: "/unrevealed.gif" } },
+    defaultValue: { avatar: { id: undefined, image: "/unrevealed.gif" } },
   });
+
+  console.log({ errors });
+
+  const { mutateAsync: registerMember } = trpc.profile.register.useMutation();
 
   const id = watch.avatar?.id;
   const image = watch.avatar?.image;
 
   const { data } = trpc.mrCrypto.getMrcNftImages.useQuery();
 
-  console.log("isOpen", isOpen);
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog
@@ -91,7 +91,7 @@ export default function MyDialog({
 
               <form
                 className="form-control mx-3 gap-3"
-                onSubmit={handleSubmit((d) => console.log(d))}
+                onSubmit={handleSubmit((d) => registerMember(d))}
               >
                 <div className="form-control">
                   <label className="label">
@@ -136,6 +136,13 @@ export default function MyDialog({
                     placeholder="Nombre"
                     {...register("name")}
                   />
+                  {errors.name && (
+                    <label className="label">
+                      <span className="label-text-alt">
+                        {errors.name.message}
+                      </span>
+                    </label>
+                  )}
                 </div>
                 <div className="form-control">
                   <label className="label">
@@ -146,6 +153,13 @@ export default function MyDialog({
                     placeholder="Email"
                     {...register("email")}
                   />
+                  {errors.email && (
+                    <label className="label">
+                      <span className="label-text-alt">
+                        {errors.email.message}
+                      </span>
+                    </label>
+                  )}
                 </div>
                 <div className="form-control">
                   <label className="label">
@@ -156,6 +170,13 @@ export default function MyDialog({
                     placeholder="Github"
                     {...register("github")}
                   />
+                  {errors.github && (
+                    <label className="label">
+                      <span className="label-text-alt">
+                        {errors.github.message}
+                      </span>
+                    </label>
+                  )}
                 </div>
                 <div className="form-control">
                   <label className="label">
@@ -167,6 +188,13 @@ export default function MyDialog({
                     {...register("discord")}
                   />
                 </div>
+                {errors.discord && (
+                  <label className="label">
+                    <span className="label-text-alt">
+                      {errors.discord.message}
+                    </span>
+                  </label>
+                )}
                 <div className="flex flex-row justify-between p-5">
                   <button
                     className="btn-error btn"

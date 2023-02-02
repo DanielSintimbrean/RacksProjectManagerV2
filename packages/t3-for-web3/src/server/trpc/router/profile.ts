@@ -1,8 +1,41 @@
+import { racksProjectManager } from "@smart-contracts";
+import { TRPCError } from "@trpc/server";
 import { z } from "zod";
+import { registerMemberSchema } from "../../../utils/validator/registerMember";
 
 import { router, protectedProcedure } from "../trpc";
 
 export const profileRouter = router({
+  register: protectedProcedure
+    .input(registerMemberSchema)
+    .mutation(async ({ ctx, input }) => {
+      const isMember = await racksProjectManager.isWalletMember(
+        ctx.user.address
+      );
+
+      if (isMember) {
+        ctx.user.registered = "pending";
+        await ctx.session.save();
+      } else {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "You are not a member of the Racks Project.",
+        });
+      }
+
+      await ctx.prisma.user.update({
+        where: { address: ctx.user.address },
+        data: {
+          name: input.name,
+          githubUsername: input.github,
+          discordUsername: input.discord,
+          avatar: input.avatar.image,
+          registered: true,
+        },
+      });
+
+      return { ok: true };
+    }),
   changeName: protectedProcedure
     .input(z.object({ newName: z.string().min(3) }))
     .mutation(async ({ ctx, input }) => {

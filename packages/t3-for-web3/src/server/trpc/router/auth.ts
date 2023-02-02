@@ -14,8 +14,18 @@ export const authRouter = router({
 
       if (isMember) {
         ctx.session.user.registered = "pending";
-        await ctx.session.save();
       }
+
+      const user = await ctx.prisma.user.findUnique({
+        where: { address: ctx.session.user.address },
+      });
+
+      if (user?.registered) {
+        ctx.session.user.registered = "true";
+        ctx.session.user.avatar = user.avatar || undefined;
+      }
+
+      await ctx.session.save();
     }
 
     return ctx.session;
@@ -115,6 +125,7 @@ export const authRouter = router({
           address: siweMessage.address,
           name: user.name,
           registered,
+          avatar: user.avatar || undefined,
         };
 
         console.log(ctx.session);
