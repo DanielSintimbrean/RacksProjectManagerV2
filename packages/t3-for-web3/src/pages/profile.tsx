@@ -1,3 +1,4 @@
+import { Listbox } from "@headlessui/react";
 import type { NextPage } from "next";
 import Image from "next/image";
 import { useRouter } from "next/router";
@@ -44,7 +45,7 @@ const ProfilePage: NextPage = () => {
         </div>
         <div>
           <form
-            className="flex flex-col items-center"
+            className="form-control flex flex-col items-center gap-4"
             onSubmit={(e) => {
               e.preventDefault();
               changeNameAsync({ newName });
@@ -59,10 +60,41 @@ const ProfilePage: NextPage = () => {
               onChange={(e) => setNewName(e.target.value)}
             />
             <button type="submit" className="text-white">
-              {" "}
               Change Name
             </button>
           </form>
+          <label className="label">
+            <span className="label-text">Mr.Crypto</span>
+          </label>
+          <div className="relative mt-1">
+            <Listbox
+              value={mrcImages?.data[0]}
+              onChange={() => console.log("")}
+            >
+              <Listbox.Button className={"input-primary input"}>
+                Mr.Crypto #{}
+              </Listbox.Button>
+              <Listbox.Options
+                className={
+                  "absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                }
+              >
+                {mrcImages?.data?.map((mrc) => (
+                  <Listbox.Option
+                    key={mrc.id}
+                    value={mrc}
+                    className={({ active }) =>
+                      `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                        active ? "bg-amber-100 text-amber-900" : "text-gray-900"
+                      }`
+                    }
+                  >
+                    Mr.Crypto #{mrc.id}
+                  </Listbox.Option>
+                ))}
+              </Listbox.Options>
+            </Listbox>
+          </div>
         </div>
         <div className="flex flex-col justify-center gap-4 text-center text-white"></div>
         <div className="flex flex-row justify-center gap-4 p-48">
