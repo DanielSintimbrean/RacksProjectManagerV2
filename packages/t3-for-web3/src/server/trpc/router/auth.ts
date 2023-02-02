@@ -7,7 +7,7 @@ import { racksProjectManager } from "@smart-contracts";
 
 export const authRouter = router({
   getSession: publicProcedure.query(async ({ ctx }) => {
-    if (ctx.session.user && ctx.session.user.registered === "false") {
+    if (ctx.session.user) {
       const isMember = await racksProjectManager.isWalletMember(
         ctx.session.user.address
       );
@@ -21,6 +21,7 @@ export const authRouter = router({
       });
 
       if (user?.registered) {
+        ctx.session.user.name = user.name;
         ctx.session.user.registered = "true";
         ctx.session.user.avatar = user.avatar || undefined;
       }
@@ -75,6 +76,7 @@ export const authRouter = router({
 
         // Verify signature if not valid throw an error
         console.log({ siweMessage });
+
         const fields = await siweMessage.verify({
           signature: input.signature,
           nonce: ctx.session.nonce,

@@ -19,13 +19,12 @@
       "dependsOn": ["^build", "compile"],
       "outputs": ["{projectRoot}/dist", "{projectRoot}/.next"]
     },
-
     "start": {
-      "dependsOn": ["^build", "build"],
+      "dependsOn": ["^build", "build", "prisma:seed"],
       "outputs": ["{projectRoot}/dist", "{projectRoot}/.next"]
     },
     "dev": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build", "prisma:seed"]
     },
     "postinstall": {
       "dependsOn": ["^postinstall"]

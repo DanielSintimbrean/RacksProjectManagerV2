@@ -30,9 +30,14 @@ export default function MyDialog({
     defaultValue: { avatar: { id: undefined, image: "/unrevealed.gif" } },
   });
 
-  console.log({ errors });
+  const utils = trpc.useContext();
 
-  const { mutateAsync: registerMember } = trpc.profile.register.useMutation();
+  const { mutateAsync: registerMember } = trpc.profile.register.useMutation({
+    onSuccess: () => {
+      setIsOpen(false);
+      utils.auth.invalidate();
+    },
+  });
 
   const id = watch.avatar?.id;
   const image = watch.avatar?.image;

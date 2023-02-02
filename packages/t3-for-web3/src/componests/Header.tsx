@@ -32,7 +32,7 @@ export default function Header() {
         <ConnectButton showBalance={false} accountStatus={"address"} />
       </div>
       <nav className="">
-        <ul className="m-5 flex flex-row gap-5">
+        <ul className="menu menu-horizontal m-5 flex flex-row gap-5 px-1">
           {authenticated && session.user.registered == "false" && (
             <button
               className="btn-primary btn"
