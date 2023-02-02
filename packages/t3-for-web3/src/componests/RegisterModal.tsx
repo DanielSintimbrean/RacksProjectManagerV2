@@ -89,56 +89,84 @@ export default function MyDialog({
                 </div>
               </div>
 
-              <form className="" onSubmit={handleSubmit((d) => console.log(d))}>
-                <Listbox
-                  value={getValues("avatar")}
-                  onChange={(v) => setValue("avatar", v)}
-                >
-                  <Listbox.Button className={"input-primary input"}>
-                    Mr.Crypto #{id}
-                  </Listbox.Button>
-                  <Listbox.Options
-                    className={
-                      "absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
-                    }
+              <form
+                className="form-control mx-3 gap-3"
+                onSubmit={handleSubmit((d) => console.log(d))}
+              >
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text">Mr.Crypto</span>
+                  </label>
+                  <Listbox
+                    value={getValues("avatar")}
+                    onChange={(v) => setValue("avatar", v)}
                   >
-                    {data?.data?.map((mrc) => (
-                      <Listbox.Option
-                        key={mrc.id}
-                        value={mrc}
-                        className={({ active }) =>
-                          `relative cursor-default select-none py-2 pl-10 pr-4 ${
-                            active
-                              ? "bg-amber-100 text-amber-900"
-                              : "text-gray-900"
-                          }`
-                        }
-                      >
-                        Mr.Crypto #{mrc.id}
-                      </Listbox.Option>
-                    ))}
-                  </Listbox.Options>
-                </Listbox>
-                <input
-                  className="input-primary input my-3"
-                  placeholder="Nombre"
-                  {...register("name")}
-                />
-                <input
-                  className="input-primary input my-3"
-                  placeholder="Email"
-                  {...register("email")}
-                />
-                <input
-                  className="input-primary input my-3"
-                  placeholder="Github"
-                  {...register("github")}
-                />
-                <input
-                  className="input-primary input my-3"
-                  placeholder="Discord"
-                  {...register("discord")}
-                />
+                    <Listbox.Button className={"input-primary input"}>
+                      Mr.Crypto #{id}
+                    </Listbox.Button>
+                    <Listbox.Options
+                      className={
+                        "absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                      }
+                    >
+                      {data?.data?.map((mrc) => (
+                        <Listbox.Option
+                          key={mrc.id}
+                          value={mrc}
+                          className={({ active }) =>
+                            `relative cursor-default select-none py-2 pl-10 pr-4 ${
+                              active
+                                ? "bg-amber-100 text-amber-900"
+                                : "text-gray-900"
+                            }`
+                          }
+                        >
+                          Mr.Crypto #{mrc.id}
+                        </Listbox.Option>
+                      ))}
+                    </Listbox.Options>
+                  </Listbox>
+                </div>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text">Nombre</span>
+                  </label>
+                  <input
+                    className="input-primary input"
+                    placeholder="Nombre"
+                    {...register("name")}
+                  />
+                </div>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text">Email</span>
+                  </label>
+                  <input
+                    className="input-primary input"
+                    placeholder="Email"
+                    {...register("email")}
+                  />
+                </div>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text">GitHub</span>
+                  </label>
+                  <input
+                    className="input-primary input"
+                    placeholder="Github"
+                    {...register("github")}
+                  />
+                </div>
+                <div className="form-control">
+                  <label className="label">
+                    <span className="label-text">Discord</span>
+                  </label>
+                  <input
+                    className="input-primary input"
+                    placeholder="Discord"
+                    {...register("discord")}
+                  />
+                </div>
                 <div className="flex flex-row justify-between p-5">
                   <button
                     className="btn-error btn"
