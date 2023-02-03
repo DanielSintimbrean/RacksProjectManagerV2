@@ -307,7 +307,7 @@ contract RacksProjectManager is
         return filteredProjects;
     }
 
-    function getAllProjects() private view returns (Project[] memory) {
+    function getAllProjects() public view returns (Project[] memory) {
         Project[] memory allProjects = new Project[](projectsList.sizeOf());
 
         uint256 j = 0;

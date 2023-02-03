@@ -33,14 +33,30 @@ async function main() {
     localhostContracts.RacksProjectManager,
   );
 
+  const ERC20Mock = await ethers.getContractAt(
+    "ERC20Mock",
+    localhostContracts.ERC20Mock,
+  );
+
   await MrCryptoContract.connect(deployer).mint(6);
   await MrCryptoContract.connect(account2).mint(6);
   await MrCryptoContract.connect(account3).mint(6);
+
+  await ERC20Mock.connect(deployer).mintMore();
+  await ERC20Mock.connect(account2).mintMore();
+  await ERC20Mock.connect(account3).mintMore();
 
   await MrCryptoContract.connect(deployer).reveal();
 
   await RacksProjectManagerContract.connect(deployer).registerMember();
   await RacksProjectManagerContract.connect(account2).registerMember();
+
+  await RacksProjectManagerContract.connect(deployer).createProject(
+    "Project 1",
+    ethers.utils.parseEther("100"),
+    1,
+    5,
+  );
 
   console.log("\n==========================");
   console.log("== Hardhat node started ==");

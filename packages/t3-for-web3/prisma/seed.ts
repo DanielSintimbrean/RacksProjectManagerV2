@@ -5,6 +5,9 @@ const prisma = new PrismaClient();
 
 async function main() {
   console.log(`Start seeding ...`);
+  /**
+   * Users
+   */
   await prisma.user.create({
     data: {
       name: "DanielDS",
@@ -16,6 +19,9 @@ async function main() {
       githubUsername: "DanielSintimbrean",
     },
   });
+  /**
+   * Projects
+   */
   console.log(`Seeding finished.`);
 }
 

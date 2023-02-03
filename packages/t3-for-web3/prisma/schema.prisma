@@ -17,25 +17,36 @@ model Example {
 }
 
 model User {
-  id              String   @id @default(cuid())
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
-  address         String   @unique
+  id              String              @id @default(cuid())
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+  address         String              @unique
   name            String
-  Project         Project? @relation(fields: [projectId], references: [id])
-  projectId       String?
-  registered      Boolean  @default(false)
+  registered      Boolean             @default(false)
   discordUsername String?
   twitterUsername String?
   githubUsername  String?
   avatar          String?
+  ProjectOwns     Project[]
+  ProjectMembers  UserProjectMember[]
+}
+
+model UserProjectMember {
+  Project   Project @relation(fields: [projectId], references: [id])
+  projectId String
+  User      User?   @relation(fields: [userId], references: [id])
+  userId    String?
+
+  @@id([projectId])
 }
 
 model Project {
-  id          String   @id @default(cuid())
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id          String              @id @default(cuid())
+  createdAt   DateTime            @default(now())
+  updatedAt   DateTime            @updatedAt
   name        String
   description String
-  members     User[]
+  Owner       User                @relation(fields: [userOwnerId], references: [id])
+  userOwnerId String
+  Members     UserProjectMember[]
 }
