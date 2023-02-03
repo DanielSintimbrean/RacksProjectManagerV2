@@ -5,7 +5,9 @@ import {
   Project__factory,
   MrCryptoNFT__factory,
 } from "my-hardhat";
-import { localhost } from "my-hardhat/constants/network-mapping.json";
+import { networkMapping } from "my-hardhat/dist/constants/network-mapping";
+
+const localhost = networkMapping.localhost;
 
 const provider = new ethers.providers.JsonRpcProvider(
   "http://127.0.0.1:8545/",

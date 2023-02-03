@@ -14,10 +14,14 @@ const ProfilePage: NextPage = () => {
   const session = useSession();
   const [newName, setNewName] = useState("");
 
-  const { data: mrcImages } = trpc.mrCrypto.getMrcNftImages.useQuery(
-    undefined,
-    {}
-  );
+  const [newMrc, setNewMrc] = useState({ id: 0, image: "" });
+
+  const { data: mrcImages } = trpc.mrCrypto.getMrcNftImages.useQuery();
+
+  const { mutateAsync: changeAvatar } = trpc.profile.changeAvatar.useMutation({
+    onSuccess: () => trpcUtils.auth.getSession.invalidate(),
+  });
+
   const { mutateAsync: changeNameAsync } = trpc.profile.changeName.useMutation({
     onSuccess: () => {
       trpcUtils.auth.getSession.invalidate();
@@ -66,17 +70,28 @@ const ProfilePage: NextPage = () => {
           <label className="label">
             <span className="label-text">Mr.Crypto</span>
           </label>
-          <div className="relative mt-1">
-            <Listbox
-              value={mrcImages?.data[0]}
-              onChange={() => console.log("")}
-            >
+          <div className="form-control relative mt-1 gap-4">
+            <div className="grid place-items-center">
+              <div className="avatar">
+                <div className="mask mask-hexagon w-20">
+                  <Image
+                    src={
+                      newMrc.image || session.user.avatar || "/unrevealed.png"
+                    }
+                    className=""
+                    alt="profile picture"
+                    fill={true}
+                  />
+                </div>
+              </div>
+            </div>
+            <Listbox value={newMrc} onChange={(nm) => setNewMrc(nm)}>
               <Listbox.Button className={"input-primary input"}>
-                Mr.Crypto #{}
+                Mr.Crypto #{newMrc.id}
               </Listbox.Button>
               <Listbox.Options
                 className={
-                  "absolute mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
+                  "absolute z-10 mt-1 max-h-60 w-full overflow-auto rounded-md bg-white py-1 text-base shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none sm:text-sm"
                 }
               >
                 {mrcImages?.data?.map((mrc) => (
@@ -94,6 +109,12 @@ const ProfilePage: NextPage = () => {
                 ))}
               </Listbox.Options>
             </Listbox>
+            <button
+              className="btn-primary btn"
+              onClick={() => changeAvatar({ newAvatar: newMrc.image })}
+            >
+              Change Mr.Crypto
+            </button>
           </div>
         </div>
         <div className="flex flex-col justify-center gap-4 text-center text-white"></div>

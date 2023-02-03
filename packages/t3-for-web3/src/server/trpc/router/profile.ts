@@ -54,4 +54,23 @@ export const profileRouter = router({
 
       return { ok: true };
     }),
+  changeAvatar: protectedProcedure
+    .input(z.object({ newAvatar: z.string().url() }))
+    .mutation(async ({ ctx, input }) => {
+      await ctx.prisma.user.update({
+        where: { address: ctx.user.address },
+        data: { avatar: input.newAvatar },
+      });
+
+      ctx.session.user = {
+        name: ctx.user.name,
+        address: ctx.user.address,
+        registered: ctx.user.registered,
+        avatar: input.newAvatar,
+      };
+
+      await ctx.session.save();
+
+      return { ok: true };
+    }),
 });
