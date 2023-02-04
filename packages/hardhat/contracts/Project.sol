@@ -77,7 +77,7 @@ contract Project is Ownable, AccessControl {
     /**
      * @notice Check that user is member
      */
-    modifier onlymember() {
+    modifier onlyMember() {
         if (!racksPM.isWalletMember(msg.sender)) revert Project_NotMemberErr();
         _;
     }
@@ -122,13 +122,16 @@ contract Project is Ownable, AccessControl {
         string memory _name,
         uint256 _colateralCost,
         uint256 _reputationLevel,
-        uint256 _maxMemberNumber
+        uint256 _maxMemberNumber,
+        address _owner
     ) {
         racksPM = _racksPM;
         name = _name;
         colateralCost = _colateralCost;
         reputationLevel = _reputationLevel;
         maxMemberNumber = _maxMemberNumber;
+
+        transferOwnership(_owner);
 
         _setupRole(ADMIN_ROLE, msg.sender);
         _setupRole(ADMIN_ROLE, _racksPM.getRacksPMOwner());
@@ -147,7 +150,7 @@ contract Project is Ownable, AccessControl {
      */
     function registerInProject()
         external
-        onlymember
+        onlyMember
         isNotFinished
         isNotPaused
         isNotDeleted

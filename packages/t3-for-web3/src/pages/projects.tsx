@@ -9,7 +9,7 @@ const ProjectPage: NextPage = () => {
       <div className="flex flex-col items-center gap-12">
         <h1 className="text-4xl font-bold">Projects</h1>
         {projects?.map((project, i) => (
-          <h4 key={i}> {project}</h4>
+          <h4 key={i}> {project.name}</h4>
         ))}
       </div>
     </Layout>

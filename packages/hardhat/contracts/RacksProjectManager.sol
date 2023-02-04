@@ -118,7 +118,8 @@ contract RacksProjectManager is
             _name,
             _colateralCost,
             _reputationLevel,
-            _maxMembersNumber
+            _maxMembersNumber,
+            _msgSender()
         );
 
         progressiveId++;

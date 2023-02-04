@@ -22,7 +22,7 @@ interface IRacksProjectManager {
     /**
      * @notice Event emitted when a new project is created in RacksProjectsManager
      */
-    event NewProjectCreated(string name, address newProjectAddress);
+    event NewProjectCreated(string indexed name, address newProjectAddress);
 
     /////////////////////////////
     ///   Abstract functions  ///

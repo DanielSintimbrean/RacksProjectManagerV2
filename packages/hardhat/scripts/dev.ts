@@ -51,12 +51,16 @@ async function main() {
   await RacksProjectManagerContract.connect(deployer).registerMember();
   await RacksProjectManagerContract.connect(account2).registerMember();
 
-  await RacksProjectManagerContract.connect(deployer).createProject(
-    "Project 1",
-    ethers.utils.parseEther("100"),
-    1,
-    5,
-  );
+  const createTx = await RacksProjectManagerContract.connect(
+    deployer,
+  ).createProject("Project 1", ethers.utils.parseEther("100"), 1, 5);
+
+  await createTx.wait();
+
+  const filter =
+    RacksProjectManagerContract.filters.NewProjectCreated("Project 1");
+
+  const events = await RacksProjectManagerContract.queryFilter(filter);
 
   console.log("\n==========================");
   console.log("== Hardhat node started ==");
